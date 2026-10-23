@@ -7,6 +7,6 @@ describe("whatsapp links", () => {
   });
   it("prefills the selected service", () => {
     const url = whatsappLink(serviceMessage("Barba"));
-    expect(decodeURIComponent(url.split("?text=")[1])).toContain("Barba");
+    expect(decodeURIComponent(url.split("?text=")[1] ?? "")).toContain("Barba");
   });
 });

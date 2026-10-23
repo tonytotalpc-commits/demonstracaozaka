@@ -93,54 +93,80 @@ function Logo({ size = 56 }: { size?: number }) {
 function Header() {
   const [open, setOpen] = useState(false);
   useEffect(() => {
+    document.documentElement.style.overflow = open ? "hidden" : "";
     document.body.style.overflow = open ? "hidden" : "";
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
   }, [open]);
+  const bookLink = whatsappLink("Olá, Barbearia Zaka! Gostaria de agendar um horário.");
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur-sm">
-      <div className="mx-auto flex h-18 max-w-6xl items-center justify-between px-5 py-3 md:px-10">
-        <a href="#inicio" aria-label="Barbearia Zaka — início">
-          <Logo size={52} />
-        </a>
-        <nav className="hidden items-center gap-9 md:flex" aria-label="Principal">
-          {NAV.map((n) => (
-            <a
-              key={n.href}
-              href={n.href}
-              className="relative text-sm text-muted-foreground transition-colors hover:text-foreground"
-            >
-              {n.label}
-            </a>
-          ))}
-        </nav>
-        <a
-          href={whatsappLink("Olá, Barbearia Zaka! Gostaria de agendar um horário.")}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="hidden items-center gap-2 rounded-full border border-foreground/70 px-5 py-2.5 text-sm font-semibold transition-colors hover:border-primary hover:text-primary md:inline-flex"
-        >
-          <MessageCircle className="size-4 text-primary" /> Agendar horário
-        </a>
-        <button
-          className="grid size-11 place-items-center md:hidden"
-          aria-label={open ? "Fechar menu" : "Abrir menu"}
-          aria-expanded={open}
-          onClick={() => setOpen(!open)}
-        >
-          {open ? <X className="size-6" /> : <Menu className="size-6" />}
-        </button>
-      </div>
+    <>
+      <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur-sm">
+        <div className="mx-auto flex h-18 max-w-6xl items-center justify-between px-5 py-3 md:px-10">
+          <a href="#inicio" aria-label="Barbearia Zaka — início">
+            <Logo size={52} />
+          </a>
+          <nav className="hidden items-center gap-9 md:flex" aria-label="Principal">
+            {NAV.map((n) => (
+              <a
+                key={n.href}
+                href={n.href}
+                className="relative text-sm text-muted-foreground transition-colors hover:text-foreground"
+              >
+                {n.label}
+              </a>
+            ))}
+          </nav>
+          <a
+            href={bookLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden items-center gap-2 rounded-full border border-foreground/70 px-5 py-2.5 text-sm font-semibold transition-colors hover:border-primary hover:text-primary md:inline-flex"
+          >
+            <MessageCircle className="size-4 text-primary" /> Agendar horário
+          </a>
+          <button
+            className="grid size-11 place-items-center md:hidden"
+            aria-label="Abrir menu"
+            aria-expanded={open}
+            aria-controls="menu-movel"
+            onClick={() => setOpen(true)}
+          >
+            <Menu className="size-6" />
+          </button>
+        </div>
+      </header>
+      {/* Overlay lives outside the header: backdrop-blur makes the header a containing block for fixed children. */}
       <div
-        className={`fixed inset-x-0 top-[77px] bottom-0 bg-background transition-all duration-300 md:hidden ${
-          open ? "visible opacity-100" : "invisible -translate-y-2 opacity-0"
+        id="menu-movel"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Menu"
+        aria-hidden={!open}
+        className={`fixed inset-0 z-50 flex h-dvh flex-col bg-background transition-opacity duration-300 md:hidden ${
+          open ? "visible opacity-100" : "pointer-events-none invisible opacity-0"
         }`}
       >
-        <nav className="flex flex-col px-5 pt-4" aria-label="Menu móvel">
+        <div className="flex h-18 shrink-0 items-center justify-between border-b border-border px-5 py-3">
+          <a href="#inicio" onClick={() => setOpen(false)} aria-label="Barbearia Zaka — início">
+            <Logo size={52} />
+          </a>
+          <button
+            className="grid size-11 place-items-center"
+            aria-label="Fechar menu"
+            onClick={() => setOpen(false)}
+          >
+            <X className="size-6" />
+          </button>
+        </div>
+        <nav className="flex flex-1 flex-col overflow-y-auto overscroll-contain px-5 pb-8 pt-2" aria-label="Menu móvel">
           {NAV.map((n, i) => (
             <a
               key={n.href}
               href={n.href}
               onClick={() => setOpen(false)}
-              className="display flex items-center justify-between border-b border-border py-5 text-2xl"
+              className="display flex min-h-16 shrink-0 items-center justify-between border-b border-border py-4 text-2xl"
             >
               <span>
                 <span className="mr-4 text-sm text-primary">0{i + 1}</span>
@@ -150,16 +176,16 @@ function Header() {
             </a>
           ))}
           <a
-            href={whatsappLink("Olá, Barbearia Zaka! Gostaria de agendar um horário.")}
+            href={bookLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-8 inline-flex h-13 items-center justify-center gap-2 rounded-full bg-primary py-4 font-semibold text-primary-foreground"
+            className="mt-8 inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-primary py-4 font-semibold text-primary-foreground"
           >
             <MessageCircle className="size-5" /> Agendar pelo WhatsApp
           </a>
         </nav>
       </div>
-    </header>
+    </>
   );
 }
 
